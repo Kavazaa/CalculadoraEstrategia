@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Calculadora de Estratégia Mercado Livre com IA</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+
+            font-family: 'Inter', sans-serif;
+
+            background-color: #4A044E;
+
+            color: #FFFFFF;
+
+            background-image: url('a.png');
+
+            background-repeat: no-repeat;
+
+            background-size: cover;
+
+            background-position: center;
+
+            background-attachment: fixed;
+
+        }
+
+        .main-container {
+
+            background-color: #6A0DAD;
+
+            background-image: url('fundo.png');
+
+            background-size: cover;
+
+            background-position:left;
+
+            background-repeat: no-repeat;
+
+            border-radius: 2.5rem;
+
+        }
+
+        .section-title {
+
+            background-color: #FFD700;
+
+            color: #1F2937;
+
+            padding: 0.75rem 1.5rem;
+
+            border-radius: 0.75rem;
+
+            font-weight: 700;
+
+            font-size: 1.25rem;
+
+            display: inline-block;
+
+            margin-bottom: 1.5rem;
+
+        }
+
+        .input-group {
+
+            margin-bottom: 1.25rem;
+
+        }
+
+        .input-field {
+
+            width: 100%;
+
+            padding: 0.75rem;
+
+            border: 1px solid #9CA3AF;
+
+            border-radius: 0.5rem;
+
+            background-color: #3B0A6B;
+
+            color: #FFFFFF;
+
+            transition: border-color 0.2s, box-shadow 0.2s;
+
+        }
+
+        .input-field::placeholder {
+
+            color: #D1D5DB;
+
+        }
+
+        .input-field:focus {
+
+            outline: none;
+
+            border-color: #FFD700;
+
+            box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.5);
+
+        }
+
+        .result-card {
+
+            background-color: #3B0A6B;
+
+            border: 1px solid #8B5CF6;
+
+            border-radius: 0.75rem;
+
+            padding: 1rem;
+
+            text-align: center;
+
+            transition: background-color 0.3s, border-color 0.3s;
+
+        }
+
+        .result-value {
+
+            font-size: 1.5rem;
+
+            font-weight: 700;
+
+            color: #FFFFFF;
+
+        }
+
+        .result-label {
+
+            font-size: 0.875rem;
+
+            color: #E5E7EB;
+
+            margin-top: 0.25rem;
+
+        }
+
+        .slider {
+
+            -webkit-appearance: none;
+
+            width: 100%;
+
+            height: 8px;
+
+            border-radius: 5px;
+
+            background: #9333EA;
+
+            outline: none;
+
+            opacity: 0.8;
+
+            transition: opacity .2s;
+
+        }
+
+        .slider::-webkit-slider-thumb {
+
+            -webkit-appearance: none;
+
+            appearance: none;
+
+            width: 22px;
+
+            height: 22px;
+
+            border-radius: 50%;
+
+            background: #FFD700;
+
+            cursor: pointer;
+
+        }
+
+        .slider::-moz-range-thumb {
+
+            width: 22px;
+
+            height: 22px;
+
+            border-radius: 50%;
+
+            background: #FFD700;
+
+            cursor: pointer;
+
+        }
+
+        .btn-action {
+
+            background-color: #FFD700;
+
+            color: #3B0A6B;
+
+            font-weight: 700;
+
+            padding: 0.5rem 1rem;
+
+            border-radius: 0.5rem;
+
+            transition: background-color 0.3s, transform 0.2s;
+
+            border: none;
+
+            cursor: pointer;
+
+        }
+
+        .btn-action:hover {
+
+            background-color: #f0c808;
+
+            transform: translateY(-2px);
+
+        }
+
+        .btn-action:disabled {
+
+            background-color: #a08d3a;
+
+            cursor: not-allowed;
+
+        }
+
+        #aiAnalysisResult,
+        #savedStrategy {
+
+            background-color: rgba(0, 0, 0, 0.2);
+
+            border-radius: 0.75rem;
+
+            padding: 1.5rem;
+
+            margin-top: 1.5rem;
+
+            min-height: 100px;
+
+        }
+
+        #aiAnalysisResult h3,
+        #savedStrategy h3 {
+
+            font-size: 1.25rem;
+
+            font-weight: 600;
+
+            color: #FFD700;
+
+            margin-bottom: 1rem;
+
+        }
+
+        #aiAnalysisResult ul,
+        #savedStrategy ul {
+
+            list-style-type: none;
+
+            padding-left: 0;
+
+        }
+
+        #aiAnalysisResult li,
+        #savedStrategy li {
+
+            margin-bottom: 0.75rem;
+
+            font-size: 1.1rem;
+
+        }
+
+        #aiAnalysisResult p {
+
+            margin-bottom: 1rem;
+
+        }
+    </style>
+
+</head>
+
+<body>
+
+
+
+    <div class="container mx-auto p-4 md:p-8 max-w-6xl">
+
+        <div class="main-container p-6 md:p-8">
+
+            <header class="text-center mb-8">
+
+                <h1 class="text-3xl md:text-4xl font-bold text-white">Calculadora de GMV</h1>
+
+                <p class="mt-2 text-gray-300">Analise, simule e receba insights com Inteligência Artificial.</p>
+
+            </header>
+
+
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+                <!-- Seção de Inserção de Dados -->
+
+                <div class="p-6 rounded-xl">
+
+                    <h2 class="section-title">1. Cenário Atual</h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                        <div class="input-group">
+
+                            <label for="adsImpressions" class="block text-sm font-medium text-gray-200 mb-1">Impressões
+                                ADS</label>
+
+                            <input type="number" id="adsImpressions" class="input-field" placeholder="0">
+
+                        </div>
+
+                        <div class="input-group">
+
+                            <label for="adsClicks" class="block text-sm font-medium text-gray-200 mb-1">Cliques
+                                ADS</label>
+
+                            <input type="number" id="adsClicks" class="input-field" placeholder="0">
+
+                        </div>
+
+                        <div class="input-group">
+
+                            <label for="visits" class="block text-sm font-medium text-gray-200 mb-1">Visitas
+                                Totais</label>
+
+                            <input type="number" id="visits" class="input-field" placeholder="0">
+
+                        </div>
+
+                        <div class="input-group">
+
+                            <label for="unitsSold" class="block text-sm font-medium text-gray-200 mb-1">Unidades
+                                Vendidas</label>
+
+                            <input type="number" id="unitsSold" class="input-field" placeholder="0">
+
+                        </div>
+
+                        <div class="input-group">
+
+                            <label for="avgTicket" class="block text-sm font-medium text-gray-200 mb-1">Ticket Médio
+                                (R$)</label>
+
+                            <input type="number" id="avgTicket" class="input-field" placeholder="0.00">
+
+                        </div>
+
+                        <div class="input-group">
+
+                            <label for="gmvAds" class="block text-sm font-medium text-gray-200 mb-1">GMV ADS
+                                (R$)</label>
+
+                            <input type="number" id="gmvAds" class="input-field" placeholder="0.00">
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Seção de Resultados -->
+
+                <div class="p-6 rounded-xl">
+
+                    <h2 class="section-title">Resultados do Cenário</h2>
+
+                    <div class="grid grid-cols-2 gap-4">
+
+                        <div class="result-card">
+
+                            <div id="totalImpressions" class="result-value">0</div>
+
+                            <div class="result-label">Impressões Totais</div>
+
+                        </div>
+
+                        <div class="result-card">
+
+                            <div id="ctr" class="result-value">0%</div>
+
+                            <div class="result-label">CTR</div>
+
+                        </div>
+
+                        <div class="result-card">
+
+                            <div id="conversionRate" class="result-value">0%</div>
+
+                            <div class="result-label">Taxa de Conversão</div>
+
+                        </div>
+
+                        <div class="result-card">
+
+                            <div id="adsParticipation" class="result-value">0%</div>
+
+                            <div class="result-label">Participação ADS</div>
+
+                        </div>
+
+                        <div class="result-card col-span-2">
+
+                            <div id="organicGmv" class="result-value">R$ 0,00</div>
+
+                            <div class="result-label">GMV Orgânico</div>
+
+                        </div>
+
+                        <div class="result-card col-span-2 bg-yellow-400">
+
+                            <div id="totalGmv" class="result-value text-purple-900">R$ 0,00</div>
+
+                            <div class="result-label text-purple-800">GMV Total (Faturamento)</div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Seção do Simulador -->
+
+            <div class="mt-8 p-6 rounded-xl">
+
+                <div class="flex items-center justify-between mb-4">
+
+                    <h2 class="section-title mb-0">2. Simulador de Estratégia</h2>
+
+                    <button id="saveStrategyBtn" class="btn-action">💾 Salvar Estratégia</button>
+
+                </div>
+
+                <div class="mb-6">
+
+                    <label for="gmvObjective" class="block text-sm font-medium text-gray-200 mb-1">Defina seu GMV
+                        Objetivo (R$)</label>
+
+                    <input type="number" id="gmvObjective" class="input-field w-full md:w-1/3" placeholder="Ex: 50000">
+
+                </div>
+
+
+
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-x-6 gap-y-8 items-start">
+
+                    <div>
+
+                        <label for="impressionsSlider" class="font-medium">Aumentar Impressões</label>
+
+                        <div class="flex items-center space-x-3 mt-2">
+
+                            <input type="range" min="0" max="200" value="0" class="slider" id="impressionsSlider">
+
+                            <span id="impressionsSliderValue"
+                                class="font-bold text-yellow-400 w-16 text-right">+0%</span>
+
+                        </div>
+
+                        <div id="impressionsSliderTarget" class="text-sm text-gray-300 mt-1 h-5"></div>
+
+                    </div>
+
+                    <div>
+
+                        <label for="ctrSlider" class="font-medium">Aumentar CTR</label>
+
+                        <div class="flex items-center space-x-3 mt-2">
+
+                            <input type="range" min="0" max="200" value="0" class="slider" id="ctrSlider">
+
+                            <span id="ctrSliderValue" class="font-bold text-yellow-400 w-16 text-right">+0%</span>
+
+                        </div>
+
+                        <div id="ctrSliderTarget" class="text-sm text-gray-300 mt-1 h-5"></div>
+
+                    </div>
+
+                    <div>
+
+                        <label for="conversionSlider" class="font-medium">Melhorar Conversão</label>
+
+                        <div class="flex items-center space-x-3 mt-2">
+
+                            <input type="range" min="0" max="200" value="0" class="slider" id="conversionSlider">
+
+                            <span id="conversionSliderValue"
+                                class="font-bold text-yellow-400 w-16 text-right">+0%</span>
+
+                        </div>
+
+                        <div id="conversionSliderTarget" class="text-sm text-gray-300 mt-1 h-5"></div>
+
+                    </div>
+
+                    <div>
+
+                        <label for="ticketSlider" class="font-medium">Aumentar Ticket Médio</label>
+
+                        <div class="flex items-center space-x-3 mt-2">
+
+                            <input type="range" min="0" max="200" value="0" class="slider" id="ticketSlider">
+
+                            <span id="ticketSliderValue" class="font-bold text-yellow-400 w-16 text-right">+0%</span>
+
+                        </div>
+
+                        <div id="ticketSliderTarget" class="text-sm text-gray-300 mt-1 h-5"></div>
+
+                    </div>
+
+                    <div id="projectedGmvCard" class="result-card h-full flex flex-col justify-center">
+
+                        <div id="projectedGmv" class="result-value">R$ 0,00</div>
+
+                        <div id="projectedGmvLabel" class="result-label">GMV Projetado</div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Seção da Estratégia Salva -->
+
+            <div id="savedStrategy" class="hidden"></div>
+
+
+
+            <!-- Seção de Análise com IA -->
+
+            <div class="mt-8 p-6 rounded-xl">
+
+                <h2 class="section-title">3. Análise e Recomendações da IA</h2>
+
+                <p class="text-gray-300 mb-6">Após simular um cenário, clique no botão para receber uma análise
+                    estratégica para alcançar essas metas.</p>
+
+                <button id="getAiAnalysisBtn" class="btn-action">🤖 Gerar Análise com IA</button>
+
+                <div id="aiAnalysisResult" class="hidden">
+
+                    <div id="loader" class="flex items-center justify-center">
+
+                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg"
+                            fill="none" viewBox="0 0 24 24">
+
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                            </circle>
+
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                            </path>
+
+                        </svg>
+
+                        <span>Analisando...</span>
+
+                    </div>
+
+                    <div id="aiContent"></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <script>
+
+        // Função para formatar valores monetários
+
+        function formatCurrency(value) {
+
+            if (isNaN(value)) value = 0;
+
+            return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+        }
+
+
+
+        // Função para formatar números
+
+        function formatNumber(value) {
+
+            if (isNaN(value) || !isFinite(value)) value = 0;
+
+            return Math.round(value).toLocaleString('pt-BR');
+
+        }
+
+
+
+        // Função para formatar porcentagens
+
+        function formatPercentage(value) {
+
+            if (isNaN(value) || !isFinite(value)) value = 0;
+
+            return value.toFixed(2) + '%';
+
+        }
+
+
+
+        // Coleta todos os dados e retorna um objeto
+
+        function getScenarioData() {
+
+            const adsImpressions = parseFloat(document.getElementById('adsImpressions').value) || 0;
+
+            const adsClicks = parseFloat(document.getElementById('adsClicks').value) || 0;
+
+            const visits = parseFloat(document.getElementById('visits').value) || 0;
+
+            const unitsSold = parseFloat(document.getElementById('unitsSold').value) || 0;
+
+            const avgTicket = parseFloat(document.getElementById('avgTicket').value) || 0;
+
+            const gmvAds = parseFloat(document.getElementById('gmvAds').value) || 0;
+
+
+
+            const ctrAds = adsImpressions > 0 ? adsClicks / adsImpressions : 0;
+
+            const totalImpressions = ctrAds > 0 ? visits / ctrAds : 0;
+
+            const ctr = totalImpressions > 0 ? (visits / totalImpressions) * 100 : 0;
+
+
+
+            const conversionRate = visits > 0 ? (unitsSold / visits) * 100 : 0;
+
+            const totalGmv = unitsSold * avgTicket;
+
+            const organicGmv = totalGmv - gmvAds;
+
+            const adsParticipation = totalGmv > 0 ? (gmvAds / totalGmv) * 100 : 0;
+
+
+
+            return {
+
+                adsImpressions,
+
+                adsClicks,
+
+                visits,
+
+                unitsSold,
+
+                avgTicket,
+
+                gmvAds,
+
+                totalImpressions,
+
+                ctr,
+
+                conversionRate,
+
+                totalGmv,
+
+                organicGmv,
+
+                adsParticipation,
+
+            };
+
+        }
+
+
+
+        // Função para calcular a projeção e retornar os valores
+
+        function getProjectionData() {
+
+            const data = getScenarioData();
+
+
+
+            const impressionsIncrease = parseFloat(document.getElementById('impressionsSlider').value) / 100;
+
+            const ctrIncrease = parseFloat(document.getElementById('ctrSlider').value) / 100;
+
+            const conversionIncrease = parseFloat(document.getElementById('conversionSlider').value) / 100;
+
+            const ticketIncrease = parseFloat(document.getElementById('ticketSlider').value) / 100;
+
+
+
+            const baseTotalImpressions = data.totalImpressions;
+
+            const projectedImpressions = baseTotalImpressions * (1 + impressionsIncrease);
+
+
+
+            const baseCtr = data.ctr / 100; // CTR base em decimal
+
+            const projectedCtr = baseCtr * (1 + ctrIncrease);
+
+            const projectedVisits = projectedImpressions * projectedCtr;
+
+
+
+            const baseConversionRate = data.conversionRate / 100; // Conversão base em decimal
+
+            const projectedConversionRate = baseConversionRate * (1 + conversionIncrease);
+
+            const projectedTicket = data.avgTicket * (1 + ticketIncrease);
+
+
+
+            const projectedUnitsSold = projectedVisits * projectedConversionRate;
+
+            const projectedGmv = projectedUnitsSold * projectedTicket;
+
+
+
+            return {
+
+                projectedImpressions,
+
+                projectedCtr: projectedCtr * 100,
+
+                projectedConversionRate: projectedConversionRate * 100,
+
+                projectedTicket,
+
+                projectedGmv,
+
+            };
+
+        }
+
+
+
+        // Função principal que atualiza tudo
+
+        function runCalculations() {
+
+            const data = getScenarioData();
+
+
+
+            document.getElementById('totalImpressions').textContent = formatNumber(data.totalImpressions);
+
+            document.getElementById('ctr').textContent = formatPercentage(data.ctr);
+
+            document.getElementById('conversionRate').textContent = formatPercentage(data.conversionRate);
+
+            document.getElementById('totalGmv').textContent = formatCurrency(data.totalGmv);
+
+            document.getElementById('organicGmv').textContent = formatCurrency(data.organicGmv);
+
+            document.getElementById('adsParticipation').textContent = formatPercentage(data.adsParticipation);
+
+
+
+            document.getElementById('impressionsSliderValue').textContent = `+${document.getElementById('impressionsSlider').value}%`;
+
+            document.getElementById('ctrSliderValue').textContent = `+${document.getElementById('ctrSlider').value}%`;
+
+            document.getElementById('conversionSliderValue').textContent = `+${document.getElementById('conversionSlider').value}%`;
+
+            document.getElementById('ticketSliderValue').textContent = `+${document.getElementById('ticketSlider').value}%`;
+
+
+
+            updateProjectionUI();
+
+        }
+
+
+
+        function updateProjectionUI() {
+
+            const gmvObjective = parseFloat(document.getElementById('gmvObjective').value) || 0;
+
+            const projection = getProjectionData();
+
+
+
+            document.getElementById('projectedGmv').textContent = formatCurrency(projection.projectedGmv);
+
+
+
+            const data = getScenarioData();
+
+            if (data.totalImpressions > 0) {
+
+                document.getElementById('impressionsSliderTarget').textContent = `Alvo: ${formatNumber(projection.projectedImpressions)}`;
+
+                document.getElementById('ctrSliderTarget').textContent = `Alvo: ${formatPercentage(projection.projectedCtr)}`;
+
+                document.getElementById('conversionSliderTarget').textContent = `Alvo: ${formatPercentage(projection.projectedConversionRate)}`;
+
+                document.getElementById('ticketSliderTarget').textContent = `Alvo: ${formatCurrency(projection.projectedTicket)}`;
+
+            } else {
+
+                document.getElementById('impressionsSliderTarget').textContent = '';
+
+                document.getElementById('ctrSliderTarget').textContent = '';
+
+                document.getElementById('conversionSliderTarget').textContent = '';
+
+                document.getElementById('ticketSliderTarget').textContent = '';
+
+            }
+
+
+
+            const projectedCard = document.getElementById('projectedGmvCard');
+
+            if (gmvObjective <= 0) {
+
+                projectedCard.className = 'result-card h-full flex flex-col justify-center bg-yellow-500 border-yellow-400';
+
+            } else if (projection.projectedGmv >= gmvObjective) {
+
+                projectedCard.className = 'result-card h-full flex flex-col justify-center bg-green-500 border-green-400';
+
+            } else {
+
+                projectedCard.className = 'result-card h-full flex flex-col justify-center bg-red-500 border-red-400';
+
+            }
+
+        }
+
+
+
+        // Função para salvar e exibir a estratégia
+
+        function saveStrategy() {
+
+            const savedStrategyDiv = document.getElementById('savedStrategy');
+
+            const current = getScenarioData();
+
+            const projection = getProjectionData();
+
+
+
+            const impressionsSlider = document.getElementById('impressionsSlider').value;
+
+            const ctrSlider = document.getElementById('ctrSlider').value;
+
+            const conversionSlider = document.getElementById('conversionSlider').value;
+
+            const ticketSlider = document.getElementById('ticketSlider').value;
+
+
+
+            if (current.totalGmv === 0) {
+
+                savedStrategyDiv.innerHTML = '<h3>Estratégia</h3><p>Preencha os dados do cenário atual primeiro.</p>';
+
+                savedStrategyDiv.classList.remove('hidden');
+
+                return;
+
+            }
+
+
+
+            let html = '<h3>🎯 Plano de Ação</h3><ul>';
+
+
+
+            // Impressões
+
+            if (impressionsSlider > 0) {
+
+                html += `<li>👁️ Impressões: ${formatNumber(current.totalImpressions)} → <strong class="text-green-400">${formatNumber(projection.projectedImpressions)}</strong></li>`;
+
+            } else {
+
+                html += `<li>👁️ Impressões: ${formatNumber(current.totalImpressions)} (sem alteração)</li>`;
+
+            }
+
+            // CTR
+
+            if (ctrSlider > 0) {
+
+                html += `<li>🖱️ CTR: ${formatPercentage(current.ctr)} → <strong class="text-green-400">${formatPercentage(projection.projectedCtr)}</strong></li>`;
+
+            } else {
+
+                html += `<li>🖱️ CTR: ${formatPercentage(current.ctr)} (sem alteração)</li>`;
+
+            }
+
+            // Conversão
+
+            if (conversionSlider > 0) {
+
+                html += `<li>🛒 Conversão: ${formatPercentage(current.conversionRate)} → <strong class="text-green-400">${formatPercentage(projection.projectedConversionRate)}</strong></li>`;
+
+            } else {
+
+                html += `<li>🛒 Conversão: ${formatPercentage(current.conversionRate)} (sem alteração)</li>`;
+
+            }
+
+            // Ticket Médio
+
+            if (ticketSlider > 0) {
+
+                html += `<li>💵 Ticket Médio: ${formatCurrency(current.avgTicket)} → <strong class="text-green-400">${formatCurrency(projection.projectedTicket)}</strong></li>`;
+
+            } else {
+
+                html += `<li>💵 Ticket Médio: ${formatCurrency(current.avgTicket)} (sem alteração)</li>`;
+
+            }
+
+
+
+            html += `</ul><hr class="my-4 border-gray-500"><h3 class="text-2xl text-center">Resultado: <span class="text-green-400 font-bold">${formatCurrency(projection.projectedGmv)}</span></h3>`;
+
+
+
+            savedStrategyDiv.innerHTML = html;
+
+            savedStrategyDiv.classList.remove('hidden');
+
+        }
+
+
+
+
+
+        // Função para chamar a API Gemini
+
+        async function getAiAnalysis() {
+
+            const btn = document.getElementById('getAiAnalysisBtn');
+
+            const resultDiv = document.getElementById('aiAnalysisResult');
+
+            const loader = document.getElementById('loader');
+
+            const contentDiv = document.getElementById('aiContent');
+
+
+
+            btn.disabled = true;
+
+            resultDiv.classList.remove('hidden');
+
+            loader.style.display = 'flex';
+
+            contentDiv.innerHTML = '';
+
+
+
+            const currentData = getScenarioData();
+
+            const projectionData = getProjectionData();
+
+
+
+            if (currentData.totalGmv === 0) {
+
+                contentDiv.innerHTML = '<p>Por favor, preencha os dados do cenário atual para gerar uma análise.</p>';
+
+                loader.style.display = 'none';
+
+                btn.disabled = false;
+
+                return;
+
+            }
+
+            if (projectionData.projectedGmv <= currentData.totalGmv) {
+
+                contentDiv.innerHTML = '<p>Por favor, use os sliders para simular um cenário de crescimento antes de gerar a análise.</p>';
+
+                loader.style.display = 'none';
+
+                btn.disabled = false;
+
+                return;
+
+            }
+
+
+
+            const prompt = `
+
+                Você é um consultor especialista em e-commerce e Mercado Livre.
+
+                Um seller possui o seguinte cenário atual:
+
+                - GMV Total (Faturamento): ${formatCurrency(currentData.totalGmv)}
+
+                - Impressões Totais (Estimado): ${formatNumber(currentData.totalImpressions)}
+
+                - CTR: ${formatPercentage(currentData.ctr)}
+
+                - Taxa de Conversão: ${formatPercentage(currentData.conversionRate)}
+
+                - Ticket Médio: ${formatCurrency(currentData.avgTicket)}
+
+
+
+                Ele simulou um novo cenário e deseja alcançar as seguintes metas:
+
+                - **Meta de GMV Projetado:** ${formatCurrency(projectionData.projectedGmv)}
+
+                - **Meta de Impressões Totais:** ${formatNumber(projectionData.projectedImpressions)}
+
+                - **Meta de CTR:** ${formatPercentage(projectionData.projectedCtr)}
+
+                - **Meta de Taxa de Conversão:** ${formatPercentage(projectionData.projectedConversionRate)}
+
+                - **Meta de Ticket Médio:** ${formatCurrency(projectionData.projectedTicket)}
+
+
+
+                Com base na comparação entre o cenário atual e as metas projetadas, crie um plano de ação estratégico.
+
+                1.  **Análise da Meta:** Comente brevemente sobre a viabilidade das metas e qual alavanca (impressões, CTR, conversão ou ticket médio) teve o maior impacto na simulação.
+
+                2.  **Plano de Ação para Atingir as Metas:** Para cada uma das 4 metas (Impressões, CTR, Conversão e Ticket Médio), forneça de 2 a 3 recomendações práticas e acionáveis de como o seller pode alcançar o número específico da meta. Seja direto e objetivo.
+
+                
+
+                Formate a resposta em markdown, usando títulos para cada seção.
+
+            `;
+
+
+
+            try {
+
+                let chatHistory = [];
+
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+
+                const payload = { contents: chatHistory };
+
+                const apiKey = "AIzaSyAkMEfVu6DRbSwPw4qnzuwtPMkx4gj5OLI";
+
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+
+
+                const response = await fetch(apiUrl, {
+
+                    method: 'POST',
+
+                    headers: { 'Content-Type': 'application/json' },
+
+                    body: JSON.stringify(payload)
+
+                });
+
+
+
+                if (!response.ok) {
+
+                    throw new Error(`API Error: ${response.statusText}`);
+
+                }
+
+
+
+                const result = await response.json();
+
+
+
+                if (result.candidates && result.candidates.length > 0 &&
+
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+
+                    result.candidates[0].content.parts.length > 0) {
+
+                    let text = result.candidates[0].content.parts[0].text;
+
+
+
+                    text = text.replace(/### (.*)/g, '<h3>$1</h3>')
+
+                        .replace(/## (.*)/g, '<h3>$1</h3>')
+
+                        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+
+                        .replace(/\* (.*)/g, '<li>$1</li>')
+
+                        .replace(/(\r\n|\n|\r)/gm, '<br>')
+
+                        .replace(/<li>/g, '<ul><li>')
+
+                        .replace(/<\/li><br><ul>/g, '</li><ul>')
+
+                        .replace(/(<\/li>(?!<br><ul>))/g, '</li></ul>')
+
+
+
+
+
+                    contentDiv.innerHTML = text;
+
+                } else {
+
+                    contentDiv.innerHTML = '<p>Não foi possível obter uma análise. A resposta da IA estava vazia. Tente novamente.</p>';
+
+                }
+
+
+
+            } catch (error) {
+
+                console.error("Erro ao chamar a API Gemini:", error);
+
+                contentDiv.innerHTML = '<p>Ocorreu um erro ao tentar gerar a análise. Por favor, verifique o console para mais detalhes e tente novamente.</p>';
+
+            } finally {
+
+                loader.style.display = 'none';
+
+                btn.disabled = false;
+
+            }
+
+        }
+
+
+
+        // --- Event Listeners ---
+
+        const inputs = document.querySelectorAll('#sellerName, #adsImpressions, #adsClicks, #visits, #unitsSold, #avgTicket, #gmvAds, #gmvObjective');
+
+        inputs.forEach(input => {
+
+            input.addEventListener('input', runCalculations);
+
+        });
+
+
+
+        const sliders = document.querySelectorAll('#impressionsSlider, #ctrSlider, #conversionSlider, #ticketSlider');
+
+        sliders.forEach(slider => {
+
+            slider.addEventListener('input', runCalculations);
+
+        });
+
+
+
+        document.getElementById('saveStrategyBtn').addEventListener('click', saveStrategy);
+
+        document.getElementById('getAiAnalysisBtn').addEventListener('click', getAiAnalysis);
+
+
+
+        window.onload = () => {
+
+            runCalculations();
+
+        };
+
+
+
+    </script>
+
+</body>
+
+</html>
